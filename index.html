@@ -841,9 +841,29 @@
     "Manchester City": "https://upload.wikimedia.org/wikipedia/sco/thumb/e/eb/Manchester_City_FC_badge.svg/960px-Manchester_City_FC_badge.svg.png?20170428001246",
     "Bayern Munich": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1280px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png?20200425131404",
     "Inter": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/FC_Internazionale_Milano_2021.svg/1280px-FC_Internazionale_Milano_2021.svg.png",
-    "Barça Hanımlar": "https://ih1.redbubble.net/image.3194404696.3066/st,small,507x507-pad,600x600,f8f8f8.u3.jpg",
+    "Atletico Madrid": "https://i.imgur.com/KNVRkjA.png",
     "Chelsea": "https://upload.wikimedia.org/wikipedia/sco/thumb/c/cc/Chelsea_FC.svg/500px-Chelsea_FC.svg.png?20170427235751"
   };
+  
+  // Team name mapping: old name -> new display name
+  const TEAM_NAME_MAP = {
+    "Atletico Madrid": "Barça Hanımlar"
+  };
+  
+  // Team logo overrides for renamed teams
+  const TEAM_LOGO_OVERRIDE = {
+    "Atletico Madrid": "https://i.imgur.com/KNVRkjA.png"  // Barça Hanımlar logosu
+  };
+  
+  // Helper function to get display name
+  function getTeamDisplayName(teamName) {
+    return TEAM_NAME_MAP[teamName] || teamName;
+  }
+  
+  // Helper function to get team logo
+  function getTeamLogo(teamName) {
+    return TEAM_LOGO_OVERRIDE[teamName] || TEAMS[teamName] || '';
+  }
 
   const state = {
     pairs: [],
@@ -1101,12 +1121,14 @@
     
     teamsList.innerHTML = Object.keys(TEAMS).map(team => {
       const isPaired = pairedTeams.includes(team);
+      const displayName = getTeamDisplayName(team);
+      const logo = getTeamLogo(team);
       return `
         <div class="pairing-item ${isPaired ? 'paired' : ''} ${state.selectedTeam === team ? 'selected' : ''}" 
              onclick="${isPaired ? '' : `selectTeam('${team}')`}">
-          <img src="${TEAMS[team]}" class="team-logo" alt="${team}" onerror="this.style.display='none'">
+          <img src="${logo}" class="team-logo" alt="${displayName}" onerror="this.style.display='none'">
           <div class="pairing-text">
-            <strong>${team}</strong>
+            <strong>${displayName}</strong>
           </div>
         </div>
       `;
@@ -1154,7 +1176,8 @@
       <h2>Eşleşmeler (${state.pairs.length}/10)</h2>
       <div class="pairing-result">
         ${state.pairs.map((pair, idx) => {
-          const teamLogo = TEAMS[pair.team] || '';
+          const teamDisplayName = getTeamDisplayName(pair.team);
+          const teamLogo = getTeamLogo(pair.team);
           return `
             <div class="pair-card">
               <div class="pair-team">
@@ -1165,8 +1188,8 @@
               </div>
               <span class="pair-vs">⇄</span>
               <div class="pair-team" style="flex-direction:row-reverse;">
-                <img src="${teamLogo}" alt="${pair.team}" onerror="this.style.display='none'">
-                <strong>${pair.team}</strong>
+                <img src="${teamLogo}" alt="${teamDisplayName}" onerror="this.style.display='none'">
+                <strong>${teamDisplayName}</strong>
               </div>
               ${isAdmin ? `<button onclick="removePair(${idx})" style="background:rgba(255,255,255,0.2);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:18px;">✕</button>` : ''}
             </div>
@@ -1359,23 +1382,25 @@
         <div class="week-matches">
           ${weekMatches.map(match => {
             const matchIdx = globalIdx++;
-            const teamALogo = TEAMS[match.a.team] || '';
-            const teamBLogo = TEAMS[match.b.team] || '';
+            const teamADisplayName = getTeamDisplayName(match.a.team);
+            const teamBDisplayName = getTeamDisplayName(match.b.team);
+            const teamALogo = getTeamLogo(match.a.team);
+            const teamBLogo = getTeamLogo(match.b.team);
             return `
               <div class="match-card">
                 <div class="match-teams">
                   <div class="team">
-                    <img src="${teamALogo}" alt="${match.a.team}" onerror="this.style.display='none'">
+                    <img src="${teamALogo}" alt="${teamADisplayName}" onerror="this.style.display='none'">
                     <div class="team-info">
                       <div class="team-name">${match.a.player}</div>
-                      <div class="team-club">${match.a.team}</div>
+                      <div class="team-club">${teamADisplayName}</div>
                     </div>
                   </div>
                   <div class="team away">
-                    <img src="${teamBLogo}" alt="${match.b.team}" onerror="this.style.display='none'">
+                    <img src="${teamBLogo}" alt="${teamBDisplayName}" onerror="this.style.display='none'">
                     <div class="team-info">
                       <div class="team-name">${match.b.player}</div>
-                      <div class="team-club">${match.b.team}</div>
+                      <div class="team-club">${teamBDisplayName}</div>
                     </div>
                   </div>
                 </div>
@@ -1461,16 +1486,17 @@
     }
 
     container.innerHTML = `<table><thead><tr><th>Oyuncu</th><th>O</th><th>G</th><th>B</th><th>M</th><th>A</th><th>Y</th><th>AV</th><th>P</th></tr></thead><tbody>${standings.map((s, idx) => {
-      const teamLogo = TEAMS[s.team] || '';
+      const teamDisplayName = getTeamDisplayName(s.team);
+      const teamLogo = getTeamLogo(s.team);
       return `
       <tr class="rank-${idx + 1}">
         <td>
           <div class="player-cell">
             <span class="rank-badge">${idx + 1}</span>
-            <img src="${teamLogo}" alt="${s.team}" onerror="this.style.display='none'">
+            <img src="${teamLogo}" alt="${teamDisplayName}" onerror="this.style.display='none'">
             <div class="player-info">
               <div class="player-name">${s.player}</div>
-              <div class="player-team">${s.team}</div>
+              <div class="player-team">${teamDisplayName}</div>
             </div>
           </div>
         </td>
