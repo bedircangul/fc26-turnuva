@@ -2,1540 +2,390 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EA FC 26 Turnuva</title>
   
-  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
-    * { 
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    html {
-      -webkit-text-size-adjust: 100%;
-    }
-    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      padding: 10px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
+      padding: 20px;
     }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
+    .container { max-width: 1200px; margin: 0 auto; }
     .header {
       background: white;
       border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 15px;
+      padding: 30px;
+      margin-bottom: 20px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    .header h1 { font-size: 32px; color: #1a1a2e; margin-bottom: 10px; }
+    .header p { color: #6b7280; font-size: 16px; }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .tabs {
       display: flex;
-      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #f3f4f6;
+      padding-bottom: 10px;
+    }
+    .tab {
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .tab:hover:not(.active) { background: #f3f4f6; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    h2 { margin: 0 0 20px 0; font-size: 24px; color: #1a1a2e; }
+    
+    .pairings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+    }
+    .pairing-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
       align-items: center;
       gap: 15px;
     }
-    
-    .logo {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .player-avatar {
+      width: 50px;
+      height: 50px;
+      background: rgba(255,255,255,0.2);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-    }
-    
-    .header-text {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .header-text h1 {
-      margin: 0 0 5px 0;
-      font-size: clamp(18px, 5vw, 28px);
-      color: #1a1a2e;
-    }
-    
-    .header-text p {
-      margin: 0;
-      color: #6b7280;
-      font-size: clamp(12px, 3vw, 15px);
-    }
-    
-    .admin-badge {
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      background: #10b981;
-      color: white;
-    }
-    
-    .sync-badge {
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      background: rgba(255,255,255,0.2);
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .sync-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    }
-    
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      overflow-x: auto;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #f3f4f6;
-    }
-    
-    .tab {
-      padding: 10px 18px;
-      border: none;
-      background: transparent;
-      color: #6b7280;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 10px;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    
-    .tab:active { transform: scale(0.95); }
-    .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-    
-    h2 {
-      margin: 0 0 15px 0;
-      font-size: clamp(16px, 4vw, 20px);
-      color: #1a1a2e;
-    }
-    
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 15px;
-    }
-    
-    button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      flex: 1;
-      min-width: 120px;
-    }
-    
-    button:active { transform: scale(0.97); }
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .btn-secondary {
-      background: white;
-      color: #667eea;
-      border: 2px solid #667eea;
-    }
-    
-    @media (min-width: 768px) {
-      body { padding: 20px; }
-      .header { padding: 30px; }
-      .card { padding: 30px; }
-      button { flex: 0 1 auto; }
-    }
-    
-    .pairing-grid {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 15px;
-      align-items: start;
-      margin-top: 20px;
-    }
-    
-    @media (max-width: 768px) {
-      .pairing-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-    }
-    
-    .pairing-column {
-      background: #f9fafb;
-      border-radius: 12px;
-      padding: 15px;
-      min-height: 400px;
-    }
-    
-    .pairing-column h3 {
-      margin: 0 0 12px 0;
-      font-size: 16px;
-      color: #374151;
-      text-align: center;
-    }
-    
-    .pairing-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .pairing-item {
-      background: white;
-      border: 2px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .pairing-item:hover {
-      border-color: #667eea;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-    }
-    
-    .pairing-item.selected {
-      border-color: #667eea;
-      background: #f0f4ff;
-    }
-    
-    .pairing-item.paired {
-      opacity: 0.5;
-      cursor: default;
-    }
-    
-    .pairing-item.paired:hover {
-      transform: none;
-    }
-    
-    .team-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      object-fit: contain;
-      background: #f9fafb;
-      padding: 4px;
-    }
-    
-    .pairing-text {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .pairing-text strong {
-      display: block;
-      color: #1a1a2e;
-      font-size: 14px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .pairing-result {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .pair-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 16px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .pair-team {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .pair-team img {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.2);
-      padding: 4px;
-    }
-    
-    .pair-vs {
+      font-size: 24px;
       font-weight: 700;
-      opacity: 0.8;
+    }
+    .pairing-info { flex: 1; }
+    .player-name { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+    .team-name { font-size: 14px; opacity: 0.9; }
+    .team-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      padding: 5px;
+      object-fit: contain;
     }
     
-    .week-section {
-      margin-bottom: 25px;
-    }
-    
+    .week-section { margin-bottom: 30px; }
     .week-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 12px 20px;
+      padding: 15px 25px;
       border-radius: 12px 12px 0 0;
       font-weight: 700;
-      font-size: 15px;
+      font-size: 18px;
     }
-    
     .week-matches {
       background: #f9fafb;
       border: 2px solid #e5e7eb;
       border-top: none;
       border-radius: 0 0 12px 12px;
-      padding: 15px;
+      padding: 20px;
     }
-    
     .match-card {
       background: white;
       border: 2px solid #e5e7eb;
       border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 12px;
-    }
-    
-    .match-card:last-child {
-      margin-bottom: 0;
-    }
-    
-    .match-teams {
+      padding: 20px;
+      margin-bottom: 15px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 20px;
     }
-    
-    .team {
+    .match-card:last-child { margin-bottom: 0; }
+    .match-team {
       flex: 1;
-      min-width: 0;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 15px;
     }
-    
-    .team.away {
+    .match-team.away {
       flex-direction: row-reverse;
+      text-align: right;
     }
+    .match-team img {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      object-fit: contain;
+      background: #f9fafb;
+      padding: 5px;
+    }
+    .team-info h3 { font-size: 16px; color: #1a1a2e; margin-bottom: 3px; }
+    .team-info p { font-size: 13px; color: #6b7280; }
+    .match-score {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .match-score span { min-width: 40px; text-align: center; }
+    .match-score .vs { font-size: 18px; color: #9ca3af; font-weight: 600; }
+    .match-score .empty { color: #d1d5db; }
     
-    .team img {
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    thead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    th {
+      padding: 15px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    th:first-child { text-align: left; border-top-left-radius: 12px; }
+    th:last-child { border-top-right-radius: 12px; }
+    td { padding: 15px 12px; text-align: center; border-bottom: 1px solid #f3f4f6; }
+    td:first-child { text-align: left; }
+    tbody tr { background: white; }
+    tbody tr:hover { background: #f9fafb; }
+    
+    .rank-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      background: #e5e7eb;
+      color: #6b7280;
+      margin-right: 10px;
+    }
+    .rank-1 .rank-badge { background: #fbbf24; color: white; }
+    .rank-2 .rank-badge { background: #94a3b8; color: white; }
+    .rank-3 .rank-badge { background: #cd7f32; color: white; }
+    .rank-1 { background: #fef3c7 !important; }
+    .rank-2 { background: #f3f4f6 !important; }
+    .rank-3 { background: #fde68a !important; }
+    
+    .player-info-cell { display: flex; align-items: center; gap: 10px; }
+    .player-info-cell img {
       width: 40px;
       height: 40px;
       border-radius: 8px;
       object-fit: contain;
       background: #f9fafb;
       padding: 4px;
-      flex-shrink: 0;
     }
+    .player-details strong { display: block; font-size: 14px; color: #1a1a2e; }
+    .player-details span { font-size: 12px; color: #6b7280; }
+    .points { font-weight: 700; font-size: 18px; color: #667eea; }
     
-    .team-info {
-      flex: 1;
-      min-width: 0;
-    }
+    .loading { text-align: center; padding: 60px 20px; color: #6b7280; font-size: 16px; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
+    .empty-state-icon { font-size: 64px; margin-bottom: 20px; }
     
-    .team.away .team-info {
-      text-align: right;
-    }
-    
-    .team-name {
-      font-weight: 700;
-      font-size: 14px;
-      color: #1a1a2e;
-      margin-bottom: 3px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .team-club {
-      font-size: 12px;
-      color: #6b7280;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .score-input {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    
-    .score-input input {
-      width: 60px;
-      height: 50px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
-      border: 2px solid #e5e7eb;
-      border-radius: 10px;
-      background: white;
-      color: #1a1a2e;
-    }
-    
-    .score-input input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    
-    .score-input input:disabled {
-      background: #f3f4f6;
-      color: #9ca3af;
-    }
-    
-    .score-divider {
-      font-size: 20px;
-      font-weight: 700;
-      color: #9ca3af;
-    }
-    
-    .table-wrapper {
-      overflow-x: auto;
-      margin: 0 -20px;
-      padding: 0 20px;
-    }
-    
-    table {
-      width: 100%;
-      min-width: 700px;
-      border-collapse: separate;
-      border-spacing: 0;
-      margin-top: 15px;
-    }
-    
-    thead {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    th {
-      padding: 12px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      text-align: center;
-    }
-    
-    th:first-child {
-      border-top-left-radius: 12px;
-      text-align: left;
-      padding-left: 12px;
-    }
-    
-    th:last-child {
-      border-top-right-radius: 12px;
-    }
-    
-    td {
-      padding: 12px 8px;
-      text-align: center;
-      border-bottom: 1px solid #f3f4f6;
-      font-size: 13px;
-    }
-    
-    td:first-child {
-      text-align: left;
-      padding-left: 12px;
-    }
-    
-    tbody tr {
-      background: white;
-    }
-    
-    .rank-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 13px;
-      margin-right: 8px;
-    }
-    
-    .rank-1 .rank-badge { background: #fbbf24; color: white; }
-    .rank-2 .rank-badge { background: #94a3b8; color: white; }
-    .rank-3 .rank-badge { background: #cd7f32; color: white; }
-    .rank-1, .rank-2 { background: #ecfdf5 !important; }
-    .rank-3, .rank-4, .rank-5, .rank-6 { background: #fef3c7 !important; }
-    
-    .player-cell {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .player-cell img {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      object-fit: contain;
-      background: #f9fafb;
-      padding: 3px;
-    }
-    
-    .player-info {
-      min-width: 0;
-      flex: 1;
-    }
-    
-    .player-name {
-      font-weight: 700;
-      color: #1a1a2e;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    
-    .player-team {
-      font-size: 11px;
-      color: #6b7280;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    
-    .points {
-      font-weight: 700;
-      font-size: 15px;
-      color: #667eea;
-    }
-    
-    .playoff-info {
-      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 20px;
-    }
-    
-    .playoff-info h3 {
-      margin: 0 0 12px 0;
-      color: #1a1a2e;
-      font-size: 17px;
-    }
-    
-    .playoff-section {
-      margin-bottom: 15px;
-    }
-    
-    .playoff-section h4 {
-      margin: 0 0 10px 0;
-      color: #667eea;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    
-    .playoff-section div {
-      color: #374151;
-      line-height: 1.7;
-      font-size: 13px;
-    }
-    
-    .playoff-match {
-      background: white;
-      padding: 12px 14px;
-      border-radius: 10px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-    
-    .playoff-match strong {
-      color: #1a1a2e;
-    }
-    
-    .vs {
-      color: #6b7280;
-      font-weight: 600;
-      margin: 0 8px;
-    }
-    
-    .login-container {
-      max-width: 400px;
-      margin: 50px auto;
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    
-    .login-icon {
-      width: 70px;
-      height: 70px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      margin: 0 auto 20px;
-    }
-    
-    .login-container h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #1a1a2e;
-    }
-    
-    input[type="password"], input[type="text"] {
-      width: 100%;
-      padding: 14px;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 15px;
-      margin-bottom: 12px;
-      font-family: inherit;
-    }
-    
-    input[type="password"]:focus, input[type="text"]:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    
-    .error-message {
-      background: #fee;
-      color: #c00;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      text-align: center;
-      font-size: 14px;
-    }
-    
-    .hidden {
-      display: none !important;
-    }
-    
-    .form-label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #374151;
-      font-size: 14px;
-    }
-
-    .admin-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-    }
-
-    .info-box {
-      background: #f0f4ff;
-      border-left: 4px solid #667eea;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-size: 14px;
-      color: #374151;
-    }
-    
-    .setup-box {
-      background: #fff3cd;
-      border-left: 4px solid #ffc107;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    
-    .setup-box code {
-      background: #fff;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 12px;
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .header { padding: 20px; }
+      .header h1 { font-size: 24px; }
+      .card { padding: 20px; }
+      .tabs { overflow-x: auto; }
+      .pairings-grid { grid-template-columns: 1fr; }
+      .match-card { flex-direction: column; gap: 15px; }
+      .match-team.away { flex-direction: row; text-align: left; }
     }
   </style>
 </head>
 <body>
-  <div id="loginScreen" class="login-container hidden">
-    <div class="login-icon">⚽</div>
-    <h2>EA FC 26 Turnuva</h2>
-    <div id="errorMessage" class="error-message hidden">Hatalı kod!</div>
-    <label class="form-label">Organizatör Kodu</label>
-    <input type="password" id="adminPassword" placeholder="Organizatör kodunu girin">
-    <button class="btn-primary" onclick="login()" style="width:100%;margin-top:15px;">🔑 Organizatör Girişi</button>
-    <button class="btn-secondary" onclick="enterViewer()" style="width:100%;margin-top:10px;">👁️ Görüntüleme Modu</button>
-    <p style="text-align:center;color:#6b7280;font-size:12px;margin-top:15px;">
-      Veriler tüm cihazlarda senkronize edilir
-    </p>
-  </div>
+  <div class="container">
+    <div class="header">
+      <h1>⚽ EA FC 26 Turnuva</h1>
+      <p>Kura • Fikstür • Puan Durumu</p>
+    </div>
 
-  <div id="mainApp" class="hidden">
-    <div class="container">
-      <div class="header">
-        <div class="logo">⚽</div>
-        <div class="header-text">
-          <h1>EA FC 26 Turnuva</h1>
-          <p>Kura • Fikstür • Puan Durumu</p>
-        </div>
-        <div id="modeBadge"></div>
-        <button id="adminModeBtn" class="btn-secondary" onclick="showAdminLogin()" style="display:none;padding:8px 16px;min-width:auto;">
-          🔑 Organizatör
-        </button>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="showTab(0)">🎲 Kura</button>
+        <button class="tab" onclick="showTab(1)">📅 Fikstür</button>
+        <button class="tab" onclick="showTab(2)">🏆 Puan Durumu</button>
       </div>
 
-      <div class="card">
-        <div class="tabs">
-          <button class="tab active" onclick="showTab(0)">🎲 Kura</button>
-          <button class="tab" onclick="showTab(1)">📅 Fikstür</button>
-          <button class="tab" onclick="showTab(2)">🏆 Puan</button>
-        </div>
+      <div class="tab-content active" id="tab0">
+        <h2>Takım Eşleştirmeleri</h2>
+        <div id="pairingsContent" class="loading">Yükleniyor...</div>
+      </div>
 
-        <div id="tab0">
-          <div class="info-box" id="kuraInfo">
-            <strong>💡 Nasıl Çalışır?</strong><br>
-            Soldaki oyuncuya tıklayın, ardından sağdaki takıma tıklayın. Eşleştirme otomatik olarak yapılır ve tüm cihazlarda görünür.
-          </div>
-          
-          <div class="pairing-grid" id="pairingGrid">
-            <div class="pairing-column" id="playersColumn">
-              <h3>👤 Oyuncular</h3>
-              <div id="playersList" class="pairing-list"></div>
-            </div>
-            
-            <div style="display:flex;align-items:center;justify-content:center;" id="pairingArrow">
-              <div style="font-size:32px;color:#667eea;">⇄</div>
-            </div>
-            
-            <div class="pairing-column" id="teamsColumn">
-              <h3>⚽ Takımlar</h3>
-              <div id="teamsList" class="pairing-list"></div>
-            </div>
-          </div>
+      <div class="tab-content" id="tab1">
+        <h2>Maç Fikstürü</h2>
+        <div id="fixtureContent" class="loading">Yükleniyor...</div>
+      </div>
 
-          <div id="pairingResults" style="margin-top:20px;"></div>
-          
-          <div class="admin-actions" id="adminActions">
-            <button class="btn-primary" onclick="resetPairings()">🔄 Eşleştirmeleri Sıfırla</button>
-            <button class="btn-secondary" onclick="clearAll()">🗑️ Hepsini Temizle</button>
-          </div>
-        </div>
-
-        <div id="tab1" class="hidden">
-          <div class="info-box" id="fiksturInfo">
-            Round-robin sistemi: Her oyuncu diğer tüm oyuncularla birer maç oynar. Maçlar haftalara bölünmüştür.
-          </div>
-          <button class="btn-primary" onclick="generateFixture()" style="width:100%;margin-bottom:20px;" id="generateBtn">
-            <span id="generateBtnText">📅 Fikstür Oluştur</span>
-          </button>
-          <div id="fixtureList"></div>
-        </div>
-
-        <div id="tab2" class="hidden">
-          <div class="playoff-info" style="margin-bottom:15px">
-            <h3>📋 Turnuva Formatı</h3>
-            <div class="playoff-section">
-              <h4>🏅 Grup Aşaması</h4>
-              <div>Round-robin sistemi • Galibiyet: 3 puan • Beraberlik: 1 puan</div>
-            </div>
-            <div class="playoff-section">
-              <h4>🎯 Sıralama</h4>
-              <div>1️⃣ Puan 2️⃣ İkili Averaj 3️⃣ Genel Averaj 4️⃣ Attığı Gol</div>
-            </div>
-            <div class="playoff-section">
-              <h4>⚡ Play-off</h4>
-              <div>🥇 1-2: Direkt yarı final • 🥉 3-6 vs 4-5: Play-off</div>
-            </div>
-          </div>
-          <div class="table-wrapper">
-            <div id="standings"></div>
-          </div>
-          <div id="playoffMatches"></div>
-        </div>
+      <div class="tab-content" id="tab2">
+        <h2>Puan Durumu</h2>
+        <div id="standingsContent" class="loading">Yükleniyor...</div>
       </div>
     </div>
   </div>
 
-<script>
-(function() {
-  'use strict';
-  
-  // SUPABASE CONFIG - Buraya kendi bilgilerinizi yazın
-  const SUPABASE_URL = 'https://uzbaevmzwcljoyewhaea.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6YmFldm16d2Nsam95ZXdoYWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1OTYzNTMsImV4cCI6MjA4NTE3MjM1M30.5S4YgZ0nVkgciLJyfAvp6muQL4aHbOTqFxRD2YqF5bo';
-  
-  const ADMIN_PASSWORD = "fc26org2025";  // Organizatör erişim kodu
-  let isAdmin = false;
-  let supabase = null;
-  
-  const PLAYERS = ["Bedircan", "Deniz", "Emre", "Fatih", "Gür", "İlker", "Kürşat", "Levent", "Erhan", "Furkan"];
-  
-  const TEAMS = {
-    "Arsenal": "https://upload.wikimedia.org/wikipedia/hif/8/82/Arsenal_FC.png",
-    "Liverpool": "https://upload.wikimedia.org/wikipedia/hif/b/bd/Liverpool_FC.png?20150523183711",
-    "PSG": "https://upload.wikimedia.org/wikipedia/sco/thumb/a/a7/Paris_Saint-Germain_F.C..svg/960px-Paris_Saint-Germain_F.C..svg.png?20180719051450",
-    "Barcelona": "https://upload.wikimedia.org/wikipedia/sco/thumb/4/47/FC_Barcelona_%28crest%29.svg/330px-FC_Barcelona_%28crest%29.svg.png?20170427233659",
-    "Real Madrid": "https://upload.wikimedia.org/wikipedia/sco/thumb/5/56/Real_Madrid_CF.svg/330px-Real_Madrid_CF.svg.png?20150531204016",
-    "Manchester City": "https://upload.wikimedia.org/wikipedia/sco/thumb/e/eb/Manchester_City_FC_badge.svg/960px-Manchester_City_FC_badge.svg.png?20170428001246",
-    "Bayern Munich": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1280px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png?20200425131404",
-    "Inter": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/FC_Internazionale_Milano_2021.svg/1280px-FC_Internazionale_Milano_2021.svg.png",
-    "Atletico Madrid": "https://upload.wikimedia.org/wikipedia/tr/1/1a/Atl%C3%A9tico_Madrid_logo.png?20240907063014",
-    "Chelsea": "https://upload.wikimedia.org/wikipedia/sco/thumb/c/cc/Chelsea_FC.svg/500px-Chelsea_FC.svg.png?20170427235751"
-  };
-  
-  // Team name mapping: old name -> new display name
-  const TEAM_NAME_MAP = {
-    "Atletico Madrid": "Barça Hanımlar"
-  };
-  
-  // Team logo overrides for renamed teams
-  const TEAM_LOGO_OVERRIDE = {
-    "Atletico Madrid": "https://i.imgur.com/KNVRkjA.png"  // Barça Hanımlar logosu
-  };
-  
-  // Helper function to get display name
-  function getTeamDisplayName(teamName) {
-    return TEAM_NAME_MAP[teamName] || teamName;
-  }
-  
-  // Helper function to get team logo
-  function getTeamLogo(teamName) {
-    return TEAM_LOGO_OVERRIDE[teamName] || TEAMS[teamName] || '';
-  }
-
-  const state = {
-    pairs: [],
-    games: [],
-    weeks: [],
-    currentTab: 0,
-    selectedPlayer: null,
-    selectedTeam: null
-  };
-
-  const $ = (id) => document.getElementById(id);
-
-  // Initialize Supabase
-  function initSupabase() {
-    // Check if config is set
-    if (SUPABASE_URL === 'BURAYA_SUPABASE_URL_YAZIN' || SUPABASE_KEY === 'BURAYA_SUPABASE_KEY_YAZIN') {
-      console.error('⚠️ Supabase config not set! Please edit the HTML file.');
-      alert('⚠️ Supabase yapılandırması eksik. Lütfen site yöneticisiyle iletişime geçin.');
-      return false;
-    }
+  <script>
+    const SUPABASE_URL = 'https://uukuiucolqmfrhicqqdw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3VpdWNvbHFtZnJoaWNxcWR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MjE2NTcsImV4cCI6MjA4NTI5NzY1N30.9sT6hNikOjO9rA5o19al6CTslNYjXDRscLCNuoayjz8';
+    let supabase = null;
     
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    $('loginScreen').classList.remove('hidden');
-    
-    // Start real-time subscription
-    subscribeToChanges();
-    
-    return true;
-  }
-
-  window.saveSupabaseConfig = function() {
-    // Not needed anymore - kept for backward compatibility
-    console.warn('saveSupabaseConfig is deprecated');
-  };
-
-  // Subscribe to real-time changes
-  function subscribeToChanges() {
-    if (!supabase) return;
-    
-    supabase
-      .channel('tournament_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'tournament_state' },
-        (payload) => {
-          console.log('Data changed!', payload);
-          loadFromSupabase();
-        }
-      )
-      .subscribe();
-  }
-
-  async function saveToSupabase() {
-    if (!supabase) return;
-    
-    try {
-      const data = {
-        pairs: state.pairs,
-        games: state.games,
-        weeks: state.weeks
-      };
-      
-      // Check if record exists
-      const { data: existing } = await supabase
-        .from('tournament_state')
-        .select('id')
-        .limit(1)
-        .single();
-      
-      if (existing) {
-        // Update
-        await supabase
-          .from('tournament_state')
-          .update({ data, updated_at: new Date() })
-          .eq('id', existing.id);
-      } else {
-        // Insert
-        await supabase
-          .from('tournament_state')
-          .insert({ data, updated_at: new Date() });
+    async function init() {
+      try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabase.channel('tournament_changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'pairings' }, () => loadPairings())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, () => { loadFixture(); loadStandings(); })
+          .subscribe();
+        await loadPairings();
+        await loadFixture();
+        await loadStandings();
+      } catch (error) {
+        console.error('Init error:', error);
       }
-      
-      console.log('✅ Saved to Supabase');
-    } catch (e) {
-      console.error('❌ Supabase save error:', e);
-    }
-  }
-
-  async function loadFromSupabase() {
-    if (!supabase) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('tournament_state')
-        .select('data')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data && data.data) {
-        state.pairs = data.data.pairs || [];
-        state.games = data.data.games || [];
-        state.weeks = data.data.weeks || [];
-        
-        console.log('✅ Loaded from Supabase', {
-          pairs: state.pairs.length,
-          games: state.games.length,
-          weeks: state.weeks.length
-        });
-        
-        // Re-render everything - ALWAYS
-        if (isAdmin) {
-          renderPairingLists();
-        }
-        renderPairingResults();
-        renderFixture();
-        renderStandings();
-      }
-    } catch (e) {
-      console.error('❌ Supabase load error:', e);
-    }
-  }
-
-  window.login = function() {
-    const pw = $('adminPassword').value;
-    if (pw === ADMIN_PASSWORD) {
-      isAdmin = true;
-      $('loginScreen').classList.add('hidden');
-      $('mainApp').classList.remove('hidden');
-      $('modeBadge').innerHTML = '<div class="admin-badge">🔑 Organizatör</div>';
-      
-      // Hide admin button when in admin mode
-      const adminBtn = $('adminModeBtn');
-      if (adminBtn) adminBtn.style.display = 'none';
-      
-      loadFromSupabase().then(() => initApp());
-    } else {
-      const err = $('errorMessage');
-      err.classList.remove('hidden');
-      setTimeout(() => err.classList.add('hidden'), 3000);
-    }
-  };
-
-  window.enterViewer = function() {
-    isAdmin = false;
-    $('loginScreen').classList.add('hidden');
-    $('mainApp').classList.remove('hidden');
-    $('modeBadge').innerHTML = '<div style="padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;background:#6b7280;color:white;">👁️ Görüntüleme</div>';
-    
-    // Show admin button in viewer mode
-    const adminBtn = $('adminModeBtn');
-    if (adminBtn) adminBtn.style.display = 'block';
-    
-    loadFromSupabase().then(() => initApp());
-  };
-  
-  window.showAdminLogin = function() {
-    // Hide main app, show login screen
-    $('mainApp').classList.add('hidden');
-    $('loginScreen').classList.remove('hidden');
-  };
-
-  function initApp() {
-    console.log('Init app, isAdmin:', isAdmin);
-    
-    // Hide/show elements based on mode
-    if (!isAdmin) {
-      // Viewer mode - hide admin controls
-      const hideElements = ['adminActions', 'generateBtn', 'kuraInfo', 'fiksturInfo', 'playersColumn', 'teamsColumn', 'pairingArrow'];
-      hideElements.forEach(id => {
-        const el = $(id);
-        if (el) el.style.display = 'none';
-      });
-    } else {
-      // Admin mode - show everything
-      const showElements = ['adminActions', 'generateBtn', 'kuraInfo', 'fiksturInfo', 'playersColumn', 'teamsColumn', 'pairingArrow'];
-      showElements.forEach(id => {
-        const el = $(id);
-        if (el) el.style.display = '';
-      });
-      console.log('Rendering pairing lists for admin');
-      renderPairingLists();
     }
     
-    // Render existing data
-    if (state.pairs && state.pairs.length > 0) {
-      console.log('Rendering existing pairs');
-      renderPairingResults();
-    }
-    
-    if (state.weeks && state.weeks.length > 0) {
-      console.log('Rendering existing fixture');
-      renderFixture();
-    }
-    
-    if (state.games && state.games.length > 0) {
-      console.log('Rendering existing standings');
-      renderStandings();
-    }
-  }
-
-  $('adminPassword')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') window.login();
-  });
-
-  window.showTab = function(index) {
-    state.currentTab = index;
-    document.querySelectorAll('.tab').forEach((tab, i) => {
-      tab.classList.toggle('active', i === index);
-    });
-    for (let i = 0; i < 3; i++) {
-      const el = $(`tab${i}`);
-      if (el) el.classList.toggle('hidden', i !== index);
-    }
-  };
-
-  function renderPairingLists() {
-    if (!isAdmin) return;
-    
-    const playersList = $('playersList');
-    const teamsList = $('teamsList');
-    
-    if (!playersList || !teamsList) return;
-    
-    const pairedPlayers = state.pairs.map(p => p.player);
-    const pairedTeams = state.pairs.map(p => p.team);
-    
-    playersList.innerHTML = PLAYERS.map(player => {
-      const isPaired = pairedPlayers.includes(player);
-      return `
-        <div class="pairing-item ${isPaired ? 'paired' : ''} ${state.selectedPlayer === player ? 'selected' : ''}" 
-             onclick="${isPaired ? '' : `selectPlayer('${player}')`}">
-          <div style="width:40px;height:40px;background:#667eea;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:20px;font-weight:700;">
-            ${player.charAt(0)}
-          </div>
-          <div class="pairing-text">
-            <strong>${player}</strong>
-          </div>
-        </div>
-      `;
-    }).join('');
-    
-    teamsList.innerHTML = Object.keys(TEAMS).map(team => {
-      const isPaired = pairedTeams.includes(team);
-      const displayName = getTeamDisplayName(team);
-      const logo = getTeamLogo(team);
-      return `
-        <div class="pairing-item ${isPaired ? 'paired' : ''} ${state.selectedTeam === team ? 'selected' : ''}" 
-             onclick="${isPaired ? '' : `selectTeam('${team}')`}">
-          <img src="${logo}" class="team-logo" alt="${displayName}" onerror="this.style.display='none'">
-          <div class="pairing-text">
-            <strong>${displayName}</strong>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  window.selectPlayer = function(player) {
-    if (!isAdmin) return;
-    state.selectedPlayer = player;
-    renderPairingLists();
-    tryPair();
-  };
-
-  window.selectTeam = function(team) {
-    if (!isAdmin) return;
-    state.selectedTeam = team;
-    renderPairingLists();
-    tryPair();
-  };
-
-  function tryPair() {
-    if (state.selectedPlayer && state.selectedTeam) {
-      state.pairs.push({
-        player: state.selectedPlayer,
-        team: state.selectedTeam
-      });
-      state.selectedPlayer = null;
-      state.selectedTeam = null;
-      renderPairingLists();
-      renderPairingResults();
-      saveToSupabase();
-    }
-  }
-
-  function renderPairingResults() {
-    const container = $('pairingResults');
-    if (!container) return;
-    
-    if (!state.pairs || state.pairs.length === 0) {
-      container.innerHTML = '';
-      return;
-    }
-    
-    container.innerHTML = `
-      <h2>Eşleşmeler (${state.pairs.length}/10)</h2>
-      <div class="pairing-result">
-        ${state.pairs.map((pair, idx) => {
-          const teamDisplayName = getTeamDisplayName(pair.team);
-          const teamLogo = getTeamLogo(pair.team);
-          return `
-            <div class="pair-card">
-              <div class="pair-team">
-                <div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">
-                  ${pair.player.charAt(0)}
-                </div>
-                <strong>${pair.player}</strong>
-              </div>
-              <span class="pair-vs">⇄</span>
-              <div class="pair-team" style="flex-direction:row-reverse;">
-                <img src="${teamLogo}" alt="${teamDisplayName}" onerror="this.style.display='none'">
-                <strong>${teamDisplayName}</strong>
-              </div>
-              ${isAdmin ? `<button onclick="removePair(${idx})" style="background:rgba(255,255,255,0.2);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:18px;">✕</button>` : ''}
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-  }
-
-  window.removePair = function(index) {
-    if (!isAdmin) return;
-    
-    const removedPair = state.pairs[index];
-    
-    // Remove from pairs
-    state.pairs.splice(index, 1);
-    
-    // If fixture exists, remove games involving this player
-    if (state.games && state.games.length > 0) {
-      state.games = state.games.filter(game => 
-        game.a.player !== removedPair.player && 
-        game.b.player !== removedPair.player
-      );
-      
-      // Rebuild weeks from remaining games
-      if (state.games.length > 0) {
-        // Keep the games but rebuild weeks structure
-        const gamesPerWeek = Math.ceil(state.games.length / (state.weeks?.length || 1));
-        state.weeks = [];
-        for (let i = 0; i < state.games.length; i += gamesPerWeek) {
-          state.weeks.push(state.games.slice(i, i + gamesPerWeek));
-        }
-      } else {
-        // No games left, clear fixture
-        state.weeks = [];
-      }
-      
-      // Re-render fixture and standings
-      renderFixture();
-      renderStandings();
-    }
-    
-    // Re-render pairing interface
-    renderPairingLists();
-    renderPairingResults();
-    saveToSupabase();
-  };
-
-  window.resetPairings = function() {
-    if (!isAdmin) return;
-    if (confirm('Tüm eşleştirmeler silinecek. Emin misiniz?')) {
-      state.pairs = [];
-      state.selectedPlayer = null;
-      state.selectedTeam = null;
-      renderPairingLists();
-      renderPairingResults();
-      saveToSupabase();
-    }
-  };
-
-  window.clearAll = function() {
-    if (!isAdmin) return;
-    if (confirm('TÜM veriler (eşleştirmeler, fikstür, skorlar) silinecek. Emin misiniz?')) {
-      state.pairs = [];
-      state.games = [];
-      state.weeks = [];
-      state.selectedPlayer = null;
-      state.selectedTeam = null;
-      renderPairingLists();
-      renderPairingResults();
-      $('fixtureList').innerHTML = '';
-      $('standings').innerHTML = '';
-      $('playoffMatches').innerHTML = '';
-      saveToSupabase();
-    }
-  };
-
-  window.generateFixture = function() {
-    if (!isAdmin) return;
-    
-    if (state.pairs.length < 2) {
-      alert('⚠️ Önce en az 2 eşleştirme yapılmalı!');
-      window.showTab(0);
-      return;
-    }
-    
-    // Check if fixture already exists
-    if (state.weeks && state.weeks.length > 0) {
-      if (!confirm('⚠️ Mevcut fikstür silinip yeniden oluşturulacak. Tüm skorlar silinecek. Emin misiniz?')) {
+    async function loadPairings() {
+      const { data } = await supabase.from('pairings').select('*').order('player_name');
+      const container = document.getElementById('pairingsContent');
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎲</div><p>Henüz eşleştirme yapılmamış</p></div>';
         return;
       }
-    }
-
-    // Clear existing fixture and scores
-    state.games = [];
-    state.weeks = [];
-    
-    const n = state.pairs.length;
-    const weeks = [];
-    const pairs = [...state.pairs];
-    
-    // Track home/away count for each player
-    const homeCount = {};
-    pairs.forEach(p => homeCount[p.player] = 0);
-    
-    const hasBye = n % 2 === 1;
-    if (hasBye) {
-      pairs.push({ player: "BYE", team: "BYE" });
-    }
-    
-    const totalPlayers = pairs.length;
-    const totalRounds = totalPlayers - 1;
-    
-    for (let round = 0; round < totalRounds; round++) {
-      const weekMatches = [];
-      
-      for (let i = 0; i < totalPlayers / 2; i++) {
-        let home = pairs[i];
-        let away = pairs[totalPlayers - 1 - i];
-        
-        if (home.player === "BYE" || away.player === "BYE") continue;
-        
-        // Balance home/away: swap if away has played more home games
-        if (homeCount[away.player] < homeCount[home.player]) {
-          [home, away] = [away, home];
-        } 
-        // If equal, alternate based on round
-        else if (homeCount[away.player] === homeCount[home.player]) {
-          if (round % 2 === 1) {
-            [home, away] = [away, home];
-          }
-        }
-        
-        homeCount[home.player]++;
-        
-        weekMatches.push({
-          a: home,
-          b: away,
-          sa: null,
-          sb: null
-        });
-      }
-      
-      if (weekMatches.length > 0) {
-        weeks.push(weekMatches);
-      }
-      
-      // Round-robin rotation (keep first fixed, rotate rest)
-      const fixed = pairs[0];
-      const rotating = pairs.slice(1);
-      rotating.unshift(rotating.pop());
-      pairs.splice(0, pairs.length, fixed, ...rotating);
-    }
-    
-    state.games = weeks.flat();
-    state.weeks = weeks;
-    
-    console.log('Home/Away distribution:', homeCount);
-    
-    renderFixture();
-    renderStandings();
-    saveToSupabase();
-  };
-
-  function renderFixture() {
-    const container = $('fixtureList');
-    if (!container) {
-      console.warn('Fixture container not found');
-      return;
-    }
-    
-    console.log('Rendering fixture, weeks:', state.weeks?.length, 'games:', state.games?.length);
-    
-    // Update button text based on fixture state
-    const btnText = $('generateBtnText');
-    if (btnText && isAdmin) {
-      if (!state.weeks || state.weeks.length === 0) {
-        btnText.textContent = '📅 Fikstür Oluştur';
-      } else {
-        btnText.textContent = '🔄 Fikstürü Yenile';
-      }
-    }
-    
-    if (!state.weeks || state.weeks.length === 0) {
-      container.innerHTML = '<p style="color:#6b7280;text-align:center;padding:30px;font-size:14px;">Henüz fikstür oluşturulmamış</p>';
-      return;
-    }
-
-    let globalIdx = 0;
-    container.innerHTML = state.weeks.map((weekMatches, weekIdx) => `
-      <div class="week-section">
-        <div class="week-header">
-          📅 Hafta ${weekIdx + 1}
+      container.innerHTML = `<div class="pairings-grid">${data.map(p => `
+        <div class="pairing-card">
+          <div class="player-avatar">${p.player_name.charAt(0)}</div>
+          <div class="pairing-info">
+            <div class="player-name">${p.player_name}</div>
+            <div class="team-name">${p.team_name}</div>
+          </div>
+          ${p.team_logo_url ? `<img src="${p.team_logo_url}" class="team-logo" alt="${p.team_name}">` : ''}
         </div>
-        <div class="week-matches">
-          ${weekMatches.map(match => {
-            const matchIdx = globalIdx++;
-            const teamADisplayName = getTeamDisplayName(match.a.team);
-            const teamBDisplayName = getTeamDisplayName(match.b.team);
-            const teamALogo = getTeamLogo(match.a.team);
-            const teamBLogo = getTeamLogo(match.b.team);
-            return `
+      `).join('')}</div>`;
+    }
+    
+    async function loadFixture() {
+      const { data } = await supabase.from('matches').select('*').order('week_number').order('id');
+      const { data: pairings } = await supabase.from('pairings').select('*');
+      const container = document.getElementById('fixtureContent');
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>Henüz fikstür oluşturulmamış</p></div>';
+        return;
+      }
+      const logoMap = {};
+      if (pairings) pairings.forEach(p => logoMap[p.player_name] = p.team_logo_url);
+      const weeks = {};
+      data.forEach(m => {
+        if (!weeks[m.week_number]) weeks[m.week_number] = [];
+        weeks[m.week_number].push(m);
+      });
+      container.innerHTML = Object.keys(weeks).sort((a,b) => a-b).map(w => `
+        <div class="week-section">
+          <div class="week-header">📅 Hafta ${w}</div>
+          <div class="week-matches">
+            ${weeks[w].map(m => `
               <div class="match-card">
-                <div class="match-teams">
-                  <div class="team">
-                    <img src="${teamALogo}" alt="${teamADisplayName}" onerror="this.style.display='none'">
-                    <div class="team-info">
-                      <div class="team-name">${match.a.player}</div>
-                      <div class="team-club">${teamADisplayName}</div>
-                    </div>
-                  </div>
-                  <div class="team away">
-                    <img src="${teamBLogo}" alt="${teamBDisplayName}" onerror="this.style.display='none'">
-                    <div class="team-info">
-                      <div class="team-name">${match.b.player}</div>
-                      <div class="team-club">${teamBDisplayName}</div>
-                    </div>
-                  </div>
+                <div class="match-team">
+                  ${logoMap[m.player_home] ? `<img src="${logoMap[m.player_home]}" alt="${m.team_home}">` : ''}
+                  <div class="team-info"><h3>${m.player_home}</h3><p>${m.team_home}</p></div>
                 </div>
-                <div class="score-input">
-                  <input type="number" min="0" placeholder="-" value="${match.sa ?? ''}" 
-                    ${isAdmin ? '' : 'disabled'} 
-                    onchange="updateScore(${matchIdx}, 'a', this.value)">
-                  <span class="score-divider">:</span>
-                  <input type="number" min="0" placeholder="-" value="${match.sb ?? ''}" 
-                    ${isAdmin ? '' : 'disabled'} 
-                    onchange="updateScore(${matchIdx}, 'b', this.value)">
+                <div class="match-score">
+                  <span class="${m.score_home === null ? 'empty' : ''}">${m.score_home !== null ? m.score_home : '-'}</span>
+                  <span class="vs">:</span>
+                  <span class="${m.score_away === null ? 'empty' : ''}">${m.score_away !== null ? m.score_away : '-'}</span>
+                </div>
+                <div class="match-team away">
+                  ${logoMap[m.player_away] ? `<img src="${logoMap[m.player_away]}" alt="${m.team_away}">` : ''}
+                  <div class="team-info"><h3>${m.player_away}</h3><p>${m.team_away}</p></div>
                 </div>
               </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `).join('');
-    
-    console.log('Fixture rendered successfully');
-  }
-
-  window.updateScore = function(idx, side, value) {
-    if (!isAdmin) return;
-    const score = value === '' ? null : Math.max(0, parseInt(value) || 0);
-    
-    // Update the game in state.games
-    state.games[idx][side === 'a' ? 'sa' : 'sb'] = score;
-    
-    // CRITICAL: Also update the same game in state.weeks
-    // Find which week and match index this game belongs to
-    let globalIdx = 0;
-    for (let weekIdx = 0; weekIdx < state.weeks.length; weekIdx++) {
-      for (let matchIdx = 0; matchIdx < state.weeks[weekIdx].length; matchIdx++) {
-        if (globalIdx === idx) {
-          state.weeks[weekIdx][matchIdx][side === 'a' ? 'sa' : 'sb'] = score;
-          break;
-        }
-        globalIdx++;
-      }
-    }
-    
-    console.log(`Updated score: Game ${idx}, ${side === 'a' ? 'home' : 'away'} = ${score}`);
-    
-    renderStandings();
-    saveToSupabase();
-  };
-
-  function getHeadToHead(p1, p2) {
-    let p1Score = 0, p2Score = 0;
-    for (const g of state.games) {
-      if (g.sa === null || g.sb === null) continue;
-      if ((g.a.player === p1 && g.b.player === p2) || (g.a.player === p2 && g.b.player === p1)) {
-        const isP1Home = g.a.player === p1;
-        p1Score += isP1Home ? g.sa : g.sb;
-        p2Score += isP1Home ? g.sb : g.sa;
-      }
-    }
-    return p1Score - p2Score;
-  }
-
-  function computeStandings() {
-    const standings = new Map();
-    state.pairs.forEach(pair => {
-      standings.set(pair.player, {
-        player: pair.player, team: pair.team, played: 0, won: 0, drawn: 0,
-        lost: 0, goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0
-      });
-    });
-    
-    state.games.forEach(game => {
-      if (game.sa === null || game.sb === null) return;
-      const A = standings.get(game.a.player), B = standings.get(game.b.player);
-      A.played++; B.played++;
-      A.goalsFor += game.sa; A.goalsAgainst += game.sb;
-      B.goalsFor += game.sb; B.goalsAgainst += game.sa;
-      if (game.sa > game.sb) { A.won++; A.points += 3; B.lost++; }
-      else if (game.sa < game.sb) { B.won++; B.points += 3; A.lost++; }
-      else { A.drawn++; B.drawn++; A.points++; B.points++; }
-    });
-    
-    standings.forEach(s => { s.goalDiff = s.goalsFor - s.goalsAgainst; });
-    
-    return Array.from(standings.values()).sort((a, b) => {
-      if (b.points !== a.points) return b.points - a.points;
-      const h2h = getHeadToHead(a.player, b.player);
-      if (h2h !== 0) return -h2h;
-      if (b.goalDiff !== a.goalDiff) return b.goalDiff - a.goalDiff;
-      if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
-      return a.player.localeCompare(b.player, 'tr');
-    });
-  }
-
-  function renderStandings() {
-    const standings = computeStandings();
-    const container = $('standings');
-    
-    if (!container) return;
-    
-    if (standings.length === 0) {
-      container.innerHTML = '<p style="color:#6b7280;text-align:center;padding:30px;font-size:14px;">Henüz puan durumu yok</p>';
-      return;
-    }
-
-    container.innerHTML = `<table><thead><tr><th>Oyuncu</th><th>O</th><th>G</th><th>B</th><th>M</th><th>A</th><th>Y</th><th>AV</th><th>P</th></tr></thead><tbody>${standings.map((s, idx) => {
-      const teamDisplayName = getTeamDisplayName(s.team);
-      const teamLogo = getTeamLogo(s.team);
-      return `
-      <tr class="rank-${idx + 1}">
-        <td>
-          <div class="player-cell">
-            <span class="rank-badge">${idx + 1}</span>
-            <img src="${teamLogo}" alt="${teamDisplayName}" onerror="this.style.display='none'">
-            <div class="player-info">
-              <div class="player-name">${s.player}</div>
-              <div class="player-team">${teamDisplayName}</div>
-            </div>
+            `).join('')}
           </div>
-        </td>
-        <td>${s.played}</td><td>${s.won}</td><td>${s.drawn}</td><td>${s.lost}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td>
-        <td style="font-weight:600;color:${s.goalDiff >= 0 ? '#10b981' : '#ef4444'}">${s.goalDiff > 0 ? '+' : ''}${s.goalDiff}</td>
-        <td><span class="points">${s.points}</span></td>
-      </tr>`;
-    }).join('')}</tbody></table>`;
-    
-    renderPlayoffMatches(standings);
-  }
-
-  function renderPlayoffMatches(standings) {
-    const container = $('playoffMatches');
-    if (!container) return;
-    if (standings.length < 6 || !state.games.every(g => g.sa !== null && g.sb !== null)) {
-      container.innerHTML = '';
-      return;
+        </div>
+      `).join('');
     }
     
-    container.innerHTML = `<div class="playoff-info"><h3>⚡ Play-off Eşleşmeleri</h3>
-      <div class="playoff-section"><h4>🏆 Direkt Yarı Final</h4>
-        <div class="playoff-match"><strong>🥇 ${standings[0].player}</strong> <span style="color:#6b7280;font-size:12px;">${standings[0].team}</span></div>
-        <div class="playoff-match"><strong>🥈 ${standings[1].player}</strong> <span style="color:#6b7280;font-size:12px;">${standings[1].team}</span></div>
-      </div>
-      <div class="playoff-section"><h4>⚔️ Play-off Maçları</h4>
-        <div class="playoff-match"><strong>${standings[2].player}</strong><span class="vs">VS</span><strong>${standings[5].player}</strong></div>
-        <div class="playoff-match"><strong>${standings[3].player}</strong><span class="vs">VS</span><strong>${standings[4].player}</strong></div>
-      </div>
-      <div class="playoff-section"><h4>🎯 Yarı Final</h4>
-        <div class="playoff-match"><strong>${standings[0].player}</strong><span class="vs">VS</span><span style="color:#6b7280;">(${standings[2].player}-${standings[5].player} galibi)</span></div>
-        <div class="playoff-match"><strong>${standings[1].player}</strong><span class="vs">VS</span><span style="color:#6b7280;">(${standings[3].player}-${standings[4].player} galibi)</span></div>
-      </div>
-    </div>`;
-  }
-
-  // Initialize on load
-  window.addEventListener('DOMContentLoaded', () => {
-    if (initSupabase()) {
-      // Auto-enter viewer mode on page load
-      enterViewer();
+    async function loadStandings() {
+      const { data: pairings } = await supabase.from('pairings').select('*');
+      const { data: matches } = await supabase.from('matches').select('*');
+      const container = document.getElementById('standingsContent');
+      if (!matches || !pairings || matches.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏆</div><p>Henüz maç oynanmamış</p></div>';
+        return;
+      }
+      const standings = {};
+      pairings.forEach(p => {
+        standings[p.player_name] = { player: p.player_name, team: p.team_name, logo: p.team_logo_url, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0 };
+      });
+      matches.forEach(m => {
+        if (m.score_home === null || m.score_away === null) return;
+        const home = standings[m.player_home];
+        const away = standings[m.player_away];
+        if (!home || !away) return;
+        home.played++; away.played++;
+        home.goalsFor += m.score_home; home.goalsAgainst += m.score_away;
+        away.goalsFor += m.score_away; away.goalsAgainst += m.score_home;
+        if (m.score_home > m.score_away) { home.won++; home.points += 3; away.lost++; }
+        else if (m.score_home < m.score_away) { away.won++; away.points += 3; home.lost++; }
+        else { home.drawn++; away.drawn++; home.points++; away.points++; }
+      });
+      Object.values(standings).forEach(s => s.goalDiff = s.goalsFor - s.goalsAgainst);
+      const sorted = Object.values(standings).sort((a,b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDiff !== a.goalDiff) return b.goalDiff - a.goalDiff;
+        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+        return a.player.localeCompare(b.player, 'tr');
+      });
+      container.innerHTML = `<table><thead><tr><th>Sıra</th><th>Oyuncu</th><th>O</th><th>G</th><th>B</th><th>M</th><th>A</th><th>Y</th><th>AV</th><th>P</th></tr></thead><tbody>${sorted.map((s,i) => `
+        <tr class="rank-${i+1}">
+          <td><span class="rank-badge">${i+1}</span></td>
+          <td>
+            <div class="player-info-cell">
+              ${s.logo ? `<img src="${s.logo}" alt="${s.team}">` : ''}
+              <div class="player-details"><strong>${s.player}</strong><span>${s.team}</span></div>
+            </div>
+          </td>
+          <td>${s.played}</td><td>${s.won}</td><td>${s.drawn}</td><td>${s.lost}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td>
+          <td style="font-weight:600;color:${s.goalDiff >= 0 ? '#10b981' : '#ef4444'}">${s.goalDiff > 0 ? '+' : ''}${s.goalDiff}</td>
+          <td><span class="points">${s.points}</span></td>
+        </tr>
+      `).join('')}</tbody></table>`;
     }
-  });
-})();
-</script>
+    
+    function showTab(index) {
+      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i === index));
+      document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i === index));
+    }
+    
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
