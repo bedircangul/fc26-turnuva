@@ -841,7 +841,7 @@
     "Manchester City": "https://upload.wikimedia.org/wikipedia/sco/thumb/e/eb/Manchester_City_FC_badge.svg/960px-Manchester_City_FC_badge.svg.png?20170428001246",
     "Bayern Munich": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1280px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png?20200425131404",
     "Inter": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/FC_Internazionale_Milano_2021.svg/1280px-FC_Internazionale_Milano_2021.svg.png",
-    "Atletico Madrid": "https://i.imgur.com/KNVRkjA.png",
+    "Atletico Madrid": "https://upload.wikimedia.org/wikipedia/tr/1/1a/Atl%C3%A9tico_Madrid_logo.png?20240907063014",
     "Chelsea": "https://upload.wikimedia.org/wikipedia/sco/thumb/c/cc/Chelsea_FC.svg/500px-Chelsea_FC.svg.png?20170427235751"
   };
   
@@ -981,19 +981,19 @@
         state.games = data.data.games || [];
         state.weeks = data.data.weeks || [];
         
-        console.log('✅ Loaded from Supabase');
+        console.log('✅ Loaded from Supabase', {
+          pairs: state.pairs.length,
+          games: state.games.length,
+          weeks: state.weeks.length
+        });
         
-        // Re-render everything
-        if (state.pairs.length > 0) {
-          if (isAdmin) renderPairingLists();
-          renderPairingResults();
+        // Re-render everything - ALWAYS
+        if (isAdmin) {
+          renderPairingLists();
         }
-        if (state.weeks && state.weeks.length > 0) {
-          renderFixture();
-        }
-        if (state.games && state.games.length > 0) {
-          renderStandings();
-        }
+        renderPairingResults();
+        renderFixture();
+        renderStandings();
       }
     } catch (e) {
       console.error('❌ Supabase load error:', e);
