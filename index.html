@@ -1356,7 +1356,12 @@
 
   function renderFixture() {
     const container = $('fixtureList');
-    if (!container) return;
+    if (!container) {
+      console.warn('Fixture container not found');
+      return;
+    }
+    
+    console.log('Rendering fixture, weeks:', state.weeks?.length, 'games:', state.games?.length);
     
     // Update button text based on fixture state
     const btnText = $('generateBtnText');
@@ -1419,12 +1424,32 @@
         </div>
       </div>
     `).join('');
+    
+    console.log('Fixture rendered successfully');
   }
 
   window.updateScore = function(idx, side, value) {
     if (!isAdmin) return;
     const score = value === '' ? null : Math.max(0, parseInt(value) || 0);
+    
+    // Update the game in state.games
     state.games[idx][side === 'a' ? 'sa' : 'sb'] = score;
+    
+    // CRITICAL: Also update the same game in state.weeks
+    // Find which week and match index this game belongs to
+    let globalIdx = 0;
+    for (let weekIdx = 0; weekIdx < state.weeks.length; weekIdx++) {
+      for (let matchIdx = 0; matchIdx < state.weeks[weekIdx].length; matchIdx++) {
+        if (globalIdx === idx) {
+          state.weeks[weekIdx][matchIdx][side === 'a' ? 'sa' : 'sb'] = score;
+          break;
+        }
+        globalIdx++;
+      }
+    }
+    
+    console.log(`Updated score: Game ${idx}, ${side === 'a' ? 'home' : 'away'} = ${score}`);
+    
     renderStandings();
     saveToSupabase();
   };
