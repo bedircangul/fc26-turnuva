@@ -700,32 +700,13 @@
   </style>
 </head>
 <body>
-  <div id="setupScreen" class="login-container">
-    <div class="login-icon">⚙️</div>
-    <h2>Supabase Kurulumu</h2>
-    <div class="setup-box">
-      <strong>📝 Yapılması Gerekenler:</strong><br>
-      1. Supabase'de <code>tournament_state</code> tablosu oluşturun<br>
-      2. API bilgilerinizi aşağıya girin<br>
-      3. "Kaydet ve Devam Et" butonuna tıklayın
-    </div>
-    <label class="form-label">Supabase URL</label>
-    <input type="text" id="supabaseUrl" placeholder="https://xxxxx.supabase.co">
-    <label class="form-label">Supabase Anon Key</label>
-    <input type="text" id="supabaseKey" placeholder="eyJhbG...">
-    <button class="btn-primary" onclick="saveSupabaseConfig()" style="width:100%;margin-top:10px;">💾 Kaydet ve Devam Et</button>
-    <p style="text-align:center;color:#6b7280;font-size:12px;margin-top:15px;">
-      Bu bilgiler tarayıcınızda saklanır ve güvenlidir
-    </p>
-  </div>
-
   <div id="loginScreen" class="login-container hidden">
     <div class="login-icon">⚽</div>
     <h2>EA FC 26 Turnuva</h2>
-    <div id="errorMessage" class="error-message hidden">Hatalı şifre!</div>
-    <label class="form-label">Admin Şifresi</label>
-    <input type="password" id="adminPassword" placeholder="Admin şifresini girin">
-    <button class="btn-primary" onclick="login()" style="width:100%;margin-top:15px;">👑 Admin Girişi</button>
+    <div id="errorMessage" class="error-message hidden">Hatalı kod!</div>
+    <label class="form-label">Organizatör Kodu</label>
+    <input type="password" id="adminPassword" placeholder="Organizatör kodunu girin">
+    <button class="btn-primary" onclick="login()" style="width:100%;margin-top:15px;">🔑 Organizatör Girişi</button>
     <button class="btn-secondary" onclick="enterViewer()" style="width:100%;margin-top:10px;">👁️ Görüntüleme Modu</button>
     <p style="text-align:center;color:#6b7280;font-size:12px;margin-top:15px;">
       Veriler tüm cihazlarda senkronize edilir
@@ -742,7 +723,7 @@
         </div>
         <div id="modeBadge"></div>
         <button id="adminModeBtn" class="btn-secondary" onclick="showAdminLogin()" style="display:none;padding:8px 16px;min-width:auto;">
-          👑 Admin
+          🔑 Organizatör
         </button>
       </div>
 
@@ -826,7 +807,7 @@
   const SUPABASE_URL = 'https://uzbaevmzwcljoyewhaea.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6YmFldm16d2Nsam95ZXdoYWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1OTYzNTMsImV4cCI6MjA4NTE3MjM1M30.5S4YgZ0nVkgciLJyfAvp6muQL4aHbOTqFxRD2YqF5bo';
   
-  const ADMIN_PASSWORD = "admin123";
+  const ADMIN_PASSWORD = "fc26org2025";  // Organizatör erişim kodu
   let isAdmin = false;
   let supabase = null;
   
@@ -881,23 +862,12 @@
     // Check if config is set
     if (SUPABASE_URL === 'BURAYA_SUPABASE_URL_YAZIN' || SUPABASE_KEY === 'BURAYA_SUPABASE_KEY_YAZIN') {
       console.error('⚠️ Supabase config not set! Please edit the HTML file.');
-      $('setupScreen').classList.remove('hidden');
-      $('setupScreen').innerHTML = `
-        <div class="login-icon">⚠️</div>
-        <h2>Kurulum Gerekli</h2>
-        <div class="setup-box" style="background:#fee;border-color:#c00;">
-          <strong>❌ Supabase bilgileri eksik!</strong><br><br>
-          HTML dosyasını açıp şu satırları düzenleyin:<br>
-          <code>SUPABASE_URL</code> ve <code>SUPABASE_KEY</code><br><br>
-          Supabase Dashboard → Settings → API bölümünden alabilirsiniz.
-        </div>
-      `;
+      alert('⚠️ Supabase yapılandırması eksik. Lütfen site yöneticisiyle iletişime geçin.');
       return false;
     }
     
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    $('setupScreen').classList.add('hidden');
     $('loginScreen').classList.remove('hidden');
     
     // Start real-time subscription
@@ -908,7 +878,7 @@
 
   window.saveSupabaseConfig = function() {
     // Not needed anymore - kept for backward compatibility
-    alert('⚠️ Bu özellik kaldırıldı. Lütfen HTML dosyasını düzenleyin.');
+    console.warn('saveSupabaseConfig is deprecated');
   };
 
   // Subscribe to real-time changes
@@ -1006,7 +976,7 @@
       isAdmin = true;
       $('loginScreen').classList.add('hidden');
       $('mainApp').classList.remove('hidden');
-      $('modeBadge').innerHTML = '<div class="admin-badge">👑 Admin</div>';
+      $('modeBadge').innerHTML = '<div class="admin-badge">🔑 Organizatör</div>';
       
       // Hide admin button when in admin mode
       const adminBtn = $('adminModeBtn');
