@@ -4,30 +4,222 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EA FC 26 Turnuva</title>
+  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
     .container { max-width: 1200px; margin: 0 auto; }
-    .header { background: white; border-radius: 16px; padding: 30px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-    .header h1 { font-size: 32px; margin-bottom: 10px; }
-    .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-    .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; }
-    .tab { padding: 12px 24px; border: none; background: transparent; color: #6b7280; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 10px; }
-    .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    .header h1 { font-size: 32px; color: #1a1a2e; margin-bottom: 10px; }
+    .header p { color: #6b7280; font-size: 16px; }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #f3f4f6;
+      padding-bottom: 10px;
+    }
+    .tab {
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .tab:hover:not(.active) { background: #f3f4f6; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .pairings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-    .pairing-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
-    .player-avatar { width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
+    h2 { margin: 0 0 20px 0; font-size: 24px; color: #1a1a2e; }
+    
+    .pairings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+    }
+    .pairing-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .player-avatar {
+      width: 50px;
+      height: 50px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+    }
     .pairing-info { flex: 1; }
     .player-name { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
     .team-name { font-size: 14px; opacity: 0.9; }
-    .team-logo { width: 50px; height: 50px; border-radius: 10px; object-fit: contain; background: rgba(255,255,255,0.2); padding: 5px; }
-    .loading { text-align: center; padding: 60px 20px; color: #6b7280; }
+    .team-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.2);
+      padding: 5px;
+      object-fit: contain;
+    }
+    
+    .week-section { margin-bottom: 30px; }
+    .week-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 12px 12px 0 0;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .week-matches {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 20px;
+    }
+    .match-card {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .match-card:last-child { margin-bottom: 0; }
+    .match-team {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .match-team.away {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+    .match-team img {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      object-fit: contain;
+      background: #f9fafb;
+      padding: 5px;
+    }
+    .team-info h3 { font-size: 16px; color: #1a1a2e; margin-bottom: 3px; }
+    .team-info p { font-size: 13px; color: #6b7280; }
+    .match-score {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .match-score span { min-width: 40px; text-align: center; }
+    .match-score .vs { font-size: 18px; color: #9ca3af; font-weight: 600; }
+    .match-score .empty { color: #d1d5db; }
+    
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    thead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    th {
+      padding: 15px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    th:first-child { text-align: left; border-top-left-radius: 12px; }
+    th:last-child { border-top-right-radius: 12px; }
+    td { padding: 15px 12px; text-align: center; border-bottom: 1px solid #f3f4f6; }
+    td:first-child { text-align: left; }
+    tbody tr { background: white; }
+    tbody tr:hover { background: #f9fafb; }
+    
+    .rank-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      background: #e5e7eb;
+      color: #6b7280;
+      margin-right: 10px;
+    }
+    .rank-1 .rank-badge { background: #fbbf24; color: white; }
+    .rank-2 .rank-badge { background: #94a3b8; color: white; }
+    .rank-3 .rank-badge { background: #cd7f32; color: white; }
+    .rank-1 { background: #fef3c7 !important; }
+    .rank-2 { background: #f3f4f6 !important; }
+    .rank-3 { background: #fde68a !important; }
+    
+    .player-info-cell { display: flex; align-items: center; gap: 10px; }
+    .player-info-cell img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: #f9fafb;
+      padding: 4px;
+    }
+    .player-details strong { display: block; font-size: 14px; color: #1a1a2e; }
+    .player-details span { font-size: 12px; color: #6b7280; }
+    .points { font-weight: 700; font-size: 18px; color: #667eea; }
+    
+    .loading { text-align: center; padding: 60px 20px; color: #6b7280; font-size: 16px; }
     .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
     .empty-state-icon { font-size: 64px; margin-bottom: 20px; }
-    @media (max-width: 768px) { .pairings-grid { grid-template-columns: 1fr; } }
+    
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .header { padding: 20px; }
+      .header h1 { font-size: 24px; }
+      .card { padding: 20px; }
+      .tabs { overflow-x: auto; }
+      .pairings-grid { grid-template-columns: 1fr; }
+      .match-card { flex-direction: column; gap: 15px; }
+      .match-team.away { flex-direction: row; text-align: left; }
+    }
   </style>
 </head>
 <body>
@@ -36,72 +228,164 @@
       <h1>⚽ EA FC 26 Turnuva</h1>
       <p>Kura • Fikstür • Puan Durumu</p>
     </div>
+
     <div class="card">
       <div class="tabs">
-        <button class="tab active" onclick="switchTab(0)">🎲 Kura</button>
-        <button class="tab" onclick="switchTab(1)">📅 Fikstür</button>
-        <button class="tab" onclick="switchTab(2)">🏆 Puan Durumu</button>
+        <button class="tab active" onclick="showTab(0)">🎲 Kura</button>
+        <button class="tab" onclick="showTab(1)">📅 Fikstür</button>
+        <button class="tab" onclick="showTab(2)">🏆 Puan Durumu</button>
       </div>
-      <div class="tab-content active" id="content0">
+
+      <div class="tab-content active" id="tab0">
         <h2>Takım Eşleştirmeleri</h2>
-        <div id="pairings" class="loading">Yükleniyor...</div>
+        <div id="pairingsContent" class="loading">Yükleniyor...</div>
       </div>
-      <div class="tab-content" id="content1">
+
+      <div class="tab-content" id="tab1">
         <h2>Maç Fikstürü</h2>
-        <div id="fixture" class="loading">Yükleniyor...</div>
+        <div id="fixtureContent" class="loading">Yükleniyor...</div>
       </div>
-      <div class="tab-content" id="content2">
+
+      <div class="tab-content" id="tab2">
         <h2>Puan Durumu</h2>
-        <div id="standings" class="loading">Yükleniyor...</div>
+        <div id="standingsContent" class="loading">Yükleniyor...</div>
       </div>
     </div>
   </div>
+
   <script>
-    const sb = window.supabase.createClient(
-      'https://uukuiucolqmfrhicqqdw.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3VpdWNvbHFtZnJoaWNxcWR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MjE2NTcsImV4cCI6MjA4NTI5NzY1N30.9sT6hNikOjO9rA5o19al6CTslNYjXDRscLCNuoayjz8'
-    );
+    const SUPABASE_URL = 'https://uukuiucolqmfrhicqqdw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a3VpdWNvbHFtZnJoaWNxcWR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MjE2NTcsImV4cCI6MjA4NTI5NzY1N30.9sT6hNikOjO9rA5o19al6CTslNYjXDRscLCNuoayjz8';
+    let supabase = null;
     
-    function switchTab(index) {
-      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === index));
-      document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === index));
+    async function init() {
+      try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabase.channel('tournament_changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'pairings' }, () => loadPairings())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, () => { loadFixture(); loadStandings(); })
+          .subscribe();
+        await loadPairings();
+        await loadFixture();
+        await loadStandings();
+      } catch (error) {
+        console.error('Init error:', error);
+      }
     }
     
     async function loadPairings() {
-      const { data, error } = await sb.from('pairings').select('*').order('player_name');
-      const el = document.getElementById('pairings');
-      if (error) { el.innerHTML = '<div class="empty-state"><p>Hata: ' + error.message + '</p></div>'; return; }
-      if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎲</div><p>Henüz eşleştirme yapılmamış</p></div>'; return; }
-      el.innerHTML = '<div class="pairings-grid">' + data.map(p => `
+      const { data } = await supabase.from('pairings').select('*').order('player_name');
+      const container = document.getElementById('pairingsContent');
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎲</div><p>Henüz eşleştirme yapılmamış</p></div>';
+        return;
+      }
+      container.innerHTML = `<div class="pairings-grid">${data.map(p => `
         <div class="pairing-card">
           <div class="player-avatar">${p.player_name.charAt(0)}</div>
           <div class="pairing-info">
             <div class="player-name">${p.player_name}</div>
             <div class="team-name">${p.team_name}</div>
           </div>
-          ${p.team_logo_url ? '<img src="' + p.team_logo_url + '" class="team-logo">' : ''}
+          ${p.team_logo_url ? `<img src="${p.team_logo_url}" class="team-logo" alt="${p.team_name}">` : ''}
         </div>
-      `).join('') + '</div>';
+      `).join('')}</div>`;
     }
     
     async function loadFixture() {
-      const { data } = await sb.from('matches').select('*').order('week_number').order('id');
-      const el = document.getElementById('fixture');
-      if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>Henüz fikstür oluşturulmamış</p></div>'; return; }
-      el.innerHTML = '<p>Maçlar yüklendi: ' + data.length + '</p>';
+      const { data } = await supabase.from('matches').select('*').order('week_number').order('id');
+      const { data: pairings } = await supabase.from('pairings').select('*');
+      const container = document.getElementById('fixtureContent');
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>Henüz fikstür oluşturulmamış</p></div>';
+        return;
+      }
+      const logoMap = {};
+      if (pairings) pairings.forEach(p => logoMap[p.player_name] = p.team_logo_url);
+      const weeks = {};
+      data.forEach(m => {
+        if (!weeks[m.week_number]) weeks[m.week_number] = [];
+        weeks[m.week_number].push(m);
+      });
+      container.innerHTML = Object.keys(weeks).sort((a,b) => a-b).map(w => `
+        <div class="week-section">
+          <div class="week-header">📅 Hafta ${w}</div>
+          <div class="week-matches">
+            ${weeks[w].map(m => `
+              <div class="match-card">
+                <div class="match-team">
+                  ${logoMap[m.player_home] ? `<img src="${logoMap[m.player_home]}" alt="${m.team_home}">` : ''}
+                  <div class="team-info"><h3>${m.player_home}</h3><p>${m.team_home}</p></div>
+                </div>
+                <div class="match-score">
+                  <span class="${m.score_home === null ? 'empty' : ''}">${m.score_home !== null ? m.score_home : '-'}</span>
+                  <span class="vs">:</span>
+                  <span class="${m.score_away === null ? 'empty' : ''}">${m.score_away !== null ? m.score_away : '-'}</span>
+                </div>
+                <div class="match-team away">
+                  ${logoMap[m.player_away] ? `<img src="${logoMap[m.player_away]}" alt="${m.team_away}">` : ''}
+                  <div class="team-info"><h3>${m.player_away}</h3><p>${m.team_away}</p></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
     }
     
     async function loadStandings() {
-      document.getElementById('standings').innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏆</div><p>Henüz maç oynanmamış</p></div>';
+      const { data: pairings } = await supabase.from('pairings').select('*');
+      const { data: matches } = await supabase.from('matches').select('*');
+      const container = document.getElementById('standingsContent');
+      if (!matches || !pairings || matches.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏆</div><p>Henüz maç oynanmamış</p></div>';
+        return;
+      }
+      const standings = {};
+      pairings.forEach(p => {
+        standings[p.player_name] = { player: p.player_name, team: p.team_name, logo: p.team_logo_url, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0 };
+      });
+      matches.forEach(m => {
+        if (m.score_home === null || m.score_away === null) return;
+        const home = standings[m.player_home];
+        const away = standings[m.player_away];
+        if (!home || !away) return;
+        home.played++; away.played++;
+        home.goalsFor += m.score_home; home.goalsAgainst += m.score_away;
+        away.goalsFor += m.score_away; away.goalsAgainst += m.score_home;
+        if (m.score_home > m.score_away) { home.won++; home.points += 3; away.lost++; }
+        else if (m.score_home < m.score_away) { away.won++; away.points += 3; home.lost++; }
+        else { home.drawn++; away.drawn++; home.points++; away.points++; }
+      });
+      Object.values(standings).forEach(s => s.goalDiff = s.goalsFor - s.goalsAgainst);
+      const sorted = Object.values(standings).sort((a,b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDiff !== a.goalDiff) return b.goalDiff - a.goalDiff;
+        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+        return a.player.localeCompare(b.player, 'tr');
+      });
+      container.innerHTML = `<table><thead><tr><th>Sıra</th><th>Oyuncu</th><th>O</th><th>G</th><th>B</th><th>M</th><th>A</th><th>Y</th><th>AV</th><th>P</th></tr></thead><tbody>${sorted.map((s,i) => `
+        <tr class="rank-${i+1}">
+          <td><span class="rank-badge">${i+1}</span></td>
+          <td>
+            <div class="player-info-cell">
+              ${s.logo ? `<img src="${s.logo}" alt="${s.team}">` : ''}
+              <div class="player-details"><strong>${s.player}</strong><span>${s.team}</span></div>
+            </div>
+          </td>
+          <td>${s.played}</td><td>${s.won}</td><td>${s.drawn}</td><td>${s.lost}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td>
+          <td style="font-weight:600;color:${s.goalDiff >= 0 ? '#10b981' : '#ef4444'}">${s.goalDiff > 0 ? '+' : ''}${s.goalDiff}</td>
+          <td><span class="points">${s.points}</span></td>
+        </tr>
+      `).join('')}</tbody></table>`;
     }
     
-    window.addEventListener('DOMContentLoaded', async () => {
-      console.log('Starting...');
-      await loadPairings();
-      await loadFixture();
-      await loadStandings();
-      console.log('Loaded!');
-    });
+    function showTab(index) {
+      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i === index));
+      document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i === index));
+    }
+    
+    window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
